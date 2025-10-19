@@ -1,0 +1,36 @@
+services:
+  openliberty:
+    image: openliberty/open-liberty
+    container_name: openliberty
+    ports:
+      - "9080:9080"   # HTTP
+    volumes:
+      - ./target:/config/dropins
+    environment:
+      - WLP_LOGGING_CONSOLE_FORMAT=JSON
+      - WLP_LOGGING_CONSOLE_LOGLEVEL=INFO
+      - WLP_LOGGING_CONSOLE_SOURCE=message
+
+  payara:
+    image: payara/server-full:6.2024.6-jdk21
+    container_name: payara
+    ports:
+      - "8080:8080"   # HTTP
+      - "4848:4848"   # Admin console
+    environment:
+      - ADMIN_PASSWORD=admin
+    volumes:
+      - ./target:/opt/payara/deployments
+  checkmk:
+    image: checkmk/check-mk-raw:2.3.0-latest
+    container_name: checkmk
+    hostname: checkmk
+    restart: unless-stopped
+    ports:
+      - "8081:5000"          # Web UI port
+    environment:
+      CMK_SITE_ID: monitoring
+      CMK_PASSWORD: admin    # admin password for the web UI
+      CMK_LIVESTATUS_TCP: 'on'
+    volumes:
+      - ./checkmk:/omd/sites

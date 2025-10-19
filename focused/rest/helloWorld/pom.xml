@@ -39,4 +39,44 @@
             <scope>provided</scope>
         </dependency>
     </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+            <groupId>io.openliberty.tools</groupId>
+            <artifactId>liberty-maven-plugin</artifactId>
+            <version>3.10.2</version>
+            <configuration>
+                <serverName>defaultServer</serverName>
+                <installAppPackages>project</installAppPackages>
+                <appsDirectory>dropins</appsDirectory>
+                <serverHost>localhost</serverHost>
+                <serverHttpPort>9080</serverHttpPort>
+            </configuration>
+            </plugin>
+            <plugin>
+                <groupId>fish.payara.maven.plugins</groupId>
+                <artifactId>payara-micro-maven-plugin</artifactId>
+                <version>1.0.6</version>
+                <executions>
+                    <execution>
+                    <goals>
+                        <goal>bundle</goal>
+                    </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>fish.payara.maven.plugins</groupId>
+                <artifactId>payara-maven-plugin</artifactId>
+                <version>2.0.0</version>
+                <configuration>
+                    <payaraUrl>http://localhost:4848</payaraUrl>
+                    <user>admin</user>
+                    <password>admin</password>
+                </configuration>
+            </plugin>
+        </plugins>
+
+    </build>
 </project>

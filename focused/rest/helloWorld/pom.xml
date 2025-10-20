@@ -38,6 +38,15 @@
             <artifactId>jakarta.jakartaee-api</artifactId>
             <scope>provided</scope>
         </dependency>
+        <!-- MicroProfile Health API needed for building & unit tests locally. Marking compile so
+             tests can instantiate and call the health check. In production you can change this back
+             to 'provided' if your runtime provides the API. -->
+        <dependency>
+            <groupId>org.eclipse.microprofile.health</groupId>
+            <artifactId>microprofile-health-api</artifactId>
+            <version>4.0.1</version>
+            <scope>compile</scope>
+        </dependency>
     </dependencies>
 
     <build>

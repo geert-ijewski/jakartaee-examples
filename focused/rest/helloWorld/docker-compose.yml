@@ -1,32 +1,32 @@
 services:
-  openliberty:
-    image: openliberty/open-liberty
-    container_name: openliberty
-    ports:
-      - "9080:9080"   # HTTP
-      - "9778:8778"   # Jolokia
-    volumes:
-      - ./target:/config/dropins
-      - ./jolokia:/opt/jolokia
-    environment:
-      WLP_LOGGING_CONSOLE_FORMAT : JSON
-      WLP_LOGGING_CONSOLE_LOGLEVEL : INFO
-      WLP_LOGGING_CONSOLE_SOURCE : message
-      JAVA_TOOL_OPTIONS: "-javaagent:/opt/jolokia/jolokia-jvm.jar=port=8778,host=0.0.0.0"
+  #openliberty:
+  # image: openliberty/open-liberty
+  # container_name: openliberty
+  # ports:
+  #   - "9080:9080"   # HTTP
+  #   - "9778:8778"   # Jolokia
+  # volumes:
+  #   - ./target:/config/dropins
+  #   - ./jolokia:/opt/jolokia
+  # environment:
+  #   WLP_LOGGING_CONSOLE_FORMAT : JSON
+  #   WLP_LOGGING_CONSOLE_LOGLEVEL : INFO
+  #   WLP_LOGGING_CONSOLE_SOURCE : message
+  #   JAVA_TOOL_OPTIONS: "-javaagent:/opt/jolokia/jolokia-jvm.jar=port=8778,host=0.0.0.0"
 
-  payara:
-    image: payara/server-full:6.2024.6-jdk21
-    container_name: payara
-    ports:
-      - "8080:8080"   # HTTP
-      - "4848:4848"   # Admin console
-      - "8778:8778"   # Jolokia
-    environment:
-      ADMIN_PASSWORD: admin
-      JVM_ARGS: "-javaagent:/opt/jolokia/jolokia-jvm.jar=port=8778,host=0.0.0.0"
-    volumes:
-      - ./target:/opt/payara/deployments
-      - ./jolokia:/opt/jolokia
+  #ayara:
+  # image: payara/server-full:6.2024.6-jdk21
+  # container_name: payara
+  # ports:
+  #   - "8080:8080"   # HTTP
+  #   - "4848:4848"   # Admin console
+  #   - "8778:8778"   # Jolokia
+  # environment:
+  #   ADMIN_PASSWORD: admin
+  #   JVM_ARGS: "-javaagent:/opt/jolokia/jolokia-jvm.jar=port=8778,host=0.0.0.0"
+  # volumes:
+  #   - ./target:/opt/payara/deployments
+  #   - ./jolokia:/opt/jolokia
   checkmk:
     image: checkmk/check-mk-raw:2.3.0-latest
     container_name: checkmk
@@ -41,5 +41,31 @@ services:
     volumes:
       - ./checkmk:/omd/sites
     depends_on:
-      - openliberty
-      - payara
+      #- openliberty
+      #- payara
+      - wildfly
+
+  wildfly:
+    image: quay.io/wildfly/wildfly:latest
+    container_name: wildfly
+    ports:
+      - "8080:8080"   # HTTP (host 8080 -> container 8080)
+      - "8778:8778"    # Jolokia (host 8779 -> container 8778)
+      - "9990:9990"    # admin console
+    volumes:
+      - ./target/jaxrsHelloWorld.war:/opt/jboss/wildfly/standalone/deployments/jaxrsHelloWorld.war
+      - ./jolokia:/opt/jolokia
+      - ./docker/wildfly/enable-health.cli:/opt/jboss/enable-health.cli
+    environment:
+      - JAVA_OPTS=-javaagent:/opt/jolokia/jolokia-jvm.jar=port=8778,host=0.0.0.0
+    command:
+      - /bin/sh
+      - -c
+      - |
+        /opt/jboss/wildfly/bin/standalone.sh -b 0.0.0.0 &
+        echo "Waiting for WildFly to start..."
+        sleep 20
+        /opt/jboss/wildfly/bin/jboss-cli.sh --connect --file=/opt/jboss/enable-health.cli
+        /opt/jboss/wildfly/bin/jboss-cli.sh --connect --command="/subsystem=deployment-scanner/scanner=default:write-attribute(name=scan-enabled,value=true)"
+        /opt/jboss/wildfly/bin/jboss-cli.sh --connect --command="deployment-scanner=default:scan()"
+        tail -f /opt/jboss/wildfly/standalone/log/server.log & wait

@@ -1,0 +1,5 @@
+batch
+/extension=org.wildfly.extension.microprofile.health-smallrye:add
+/subsystem=microprofile-health-smallrye:add
+run-batch
+reload

@@ -62,7 +62,7 @@ services:
       - /bin/sh
       - -c
       - |
-        /opt/jboss/wildfly/bin/standalone.sh -b 0.0.0.0 &
+        /opt/jboss/wildfly/bin/standalone.sh -b 0.0.0.0 -bmanagement 0.0.0.0 &
         echo "Waiting for WildFly to start..."
         sleep 20
         /opt/jboss/wildfly/bin/jboss-cli.sh --connect --file=/opt/jboss/enable-health.cli

@@ -1,5 +1,6 @@
 batch
 /extension=org.wildfly.extension.microprofile.health-smallrye:add
 /subsystem=microprofile-health-smallrye:add
+/subsystem=microprofile-health-smallrye:write-attribute(name=security-enabled,value=false)
 run-batch
 reload

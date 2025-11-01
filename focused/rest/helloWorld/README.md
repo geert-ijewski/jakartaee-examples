@@ -19,3 +19,8 @@ cd jolokia
 curl -L -o jolokia-jvm.jar \
   https://repo1.maven.org/maven2/org/jolokia/jolokia-jvm/1.7.2/jolokia-jvm-1.7.2.jar
 ```
+
+# Microprofile
+
+Available on MANAGMENT Endpoint
+http://localhost:9990/health

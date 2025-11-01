@@ -1,14 +1,9 @@
 package jakartaee.examples.jaxrs.helloworld;
 
 import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.enterprise.event.Observes;
-import jakarta.enterprise.inject.spi.AfterDeploymentValidation;
 import jakarta.annotation.PostConstruct;
 
-import javax.management.InstanceAlreadyExistsException;
-import javax.management.MBeanRegistrationException;
 import javax.management.MBeanServer;
-import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 import java.lang.management.ManagementFactory;
 
@@ -49,25 +44,13 @@ public class HelloWorld implements HelloWorldMXBean {
         return (now - lastHeartbeat) < 120_000L;
     }
 
-    public void registerMBean(@Observes AfterDeploymentValidation adv) throws MalformedObjectNameException,
-        InstanceAlreadyExistsException, MBeanRegistrationException, javax.management.NotCompliantMBeanException
-    {
-        System.err.println("Creating mbean");
-
-        MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
-        ObjectName name = new ObjectName("jakartaee.examples.jaxrs.helloworld:type=Monitoring");
-        if (!mbs.isRegistered(name)) {
-            mbs.registerMBean(this, name);
-        }
-    }
-
-    /*
     @PostConstruct
     private void postConstructRegister() {
+        System.out.println("Registering helloworld mbean");
         try {
             // defensive: try to register if not already registered
             MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
-            ObjectName name = new ObjectName("jakartaee.examples.jaxrs.helloworld:type=HelloWorld");
+            ObjectName name = new ObjectName("jakartaee.examples.jaxrs.helloworld:type=Monitoring");
             if (!mbs.isRegistered(name)) {
                 mbs.registerMBean(this, name);
             }
@@ -76,5 +59,4 @@ public class HelloWorld implements HelloWorldMXBean {
             System.err.println("Failed to register HelloWorld MBean in @PostConstruct: " + t.getMessage());
         }
     }
-        */
 }

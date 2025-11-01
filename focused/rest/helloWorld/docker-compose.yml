@@ -47,25 +47,18 @@ services:
 
   wildfly:
     image: quay.io/wildfly/wildfly:latest
+    build:
+      context: ./docker
+      dockerfile: Dockerfile
     container_name: wildfly
     ports:
       - "8080:8080"   # HTTP (host 8080 -> container 8080)
       - "8778:8778"    # Jolokia (host 8779 -> container 8778)
       - "9990:9990"    # admin console
+      - "6556:6556"    # Checkmk agent
     volumes:
       - ./target/jaxrsHelloWorld.war:/opt/jboss/wildfly/standalone/deployments/jaxrsHelloWorld.war
       - ./jolokia:/opt/jolokia
       - ./docker/wildfly/enable-health.cli:/opt/jboss/enable-health.cli
     environment:
       - JAVA_OPTS=-javaagent:/opt/jolokia/jolokia-jvm.jar=port=8778,host=0.0.0.0
-    command:
-      - /bin/sh
-      - -c
-      - |
-        /opt/jboss/wildfly/bin/standalone.sh -b 0.0.0.0 -bmanagement 0.0.0.0 &
-        echo "Waiting for WildFly to start..."
-        sleep 20
-        /opt/jboss/wildfly/bin/jboss-cli.sh --connect --file=/opt/jboss/enable-health.cli
-        /opt/jboss/wildfly/bin/jboss-cli.sh --connect --command="/subsystem=deployment-scanner/scanner=default:write-attribute(name=scan-enabled,value=true)"
-        /opt/jboss/wildfly/bin/jboss-cli.sh --connect --command="deployment-scanner=default:scan()"
-        tail -f /opt/jboss/wildfly/standalone/log/server.log & wait
